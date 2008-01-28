@@ -1,7 +1,6 @@
 open Base;;
-open Scene;;
 
-let make_sphere pos rad mat =
+let create pos rad mat =
     let radp2,irad2,irad = rad *. rad, 0.5 /. rad, 1.0 /. rad in
 
     let ray_sphere r _ =
@@ -34,6 +33,6 @@ let make_sphere pos rad mat =
     let rv = vec rad rad rad in
     let bmin,bmax = pos -| rv, pos +| rv in
 
-    ( ray_sphere, get_normal, get_color, (bmin,bmax) )
+    ( ( ray_sphere, get_normal, get_color, (bmin,bmax) ) : entity_t )
 
 ;;

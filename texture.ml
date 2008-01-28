@@ -2,9 +2,6 @@ open Base;;
 open Scanf;;
 open Printf;;
 
-(* resx; resy; tablica wartoœci; nazwa *)
-type texture = int * int * (float array array) * string;;
-
 let input_short input =
 	let h,l = input_byte input,input_byte input in
 	l+h*256
@@ -28,10 +25,10 @@ let load tex_name =
 	(resx, resy, arr, tex_name)
 ;;
 
-(* ³aduje teksturki z wejœcia;
-	na wyjœciu listê tekstur *)
+(* Laduje teksturki z wejscia;
+	na wyjsciu liste tekstur *)
 let load_all (_:unit) =
-	parse_list "textures" ([]: texture list)
+	parse_list "textures" ([]: texture_t list)
 		(fun lst ->
 			let name = scanf "%s" id in
 			(load name) :: lst

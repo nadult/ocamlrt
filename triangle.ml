@@ -1,9 +1,6 @@
 open Base;;
-open Scene;;
 
-
-
-let make_triangle p1 p2 p3 mat =
+let create p1 p2 p3 (mat:material_t) =
 
     let bmin,bmax = (minv (minv p1 p2) p3), (maxv (maxv p1 p2) p3) in
     let nrm = unitize (cross (p2 -| p1) (p3 -| p1) ) in
@@ -11,7 +8,7 @@ let make_triangle p1 p2 p3 mat =
 
     let sample_color,sample_normal = mat in
 
-    let ray_triangle r _ =
+    let ray_triangle (r:ray_t) (_:tracedata_t) =
         let r_orig,r_dir = r in
         let cosa = dot r_dir nrm in
 
@@ -43,6 +40,6 @@ let make_triangle p1 p2 p3 mat =
         sample_color (compute_uv col)
     in
 
-    ( ray_triangle, get_nrm, get_color, (bmin,bmax) )
+   (  ( ray_triangle, get_nrm, get_color, (bmin,bmax) ) : entity_t )
 ;;
 

@@ -1,6 +1,6 @@
 OCAMLC=ocamlopt
 FLAGS=-cc g++-4.2 -ccopt -O3
-FILES=base.ml texture.ml scene.ml rtracer.ml main.ml triangle.ml material.ml sphere.ml plane.ml entlist.ml kdtree.ml
+FILES=base.ml texture.ml material.ml triangle.ml sphere.ml plane.ml entlist.ml kdtree.ml scene.ml rtracer.ml main.ml
 
 all: rtracer
 	

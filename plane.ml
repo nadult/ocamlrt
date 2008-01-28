@@ -1,7 +1,6 @@
 open Base;;
-open Scene;;
 
-let make_plane nrm dist mat =
+let create nrm dist mat =
 
     let ray_plane r _ =
         let r_orig,r_dir = r in
@@ -28,5 +27,5 @@ let make_plane nrm dist mat =
     let bmin = (vec (-.infinity) (-.infinity) (-.infinity) ) and
         bmax = (vec infinity infinity infinity ) in
 
-    ( ray_plane, get_normal, get_color, (bmin,bmax) )
+    ( ( ray_plane, get_normal, get_color, (bmin,bmax) ) : entity_t )
 ;;

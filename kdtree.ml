@@ -1,14 +1,9 @@
-(* Definicje obiektów sceny + funkcje ³aduj¹ce *)
-
 open Base;;
-open Scene;;
 
-
-(* Na wejsciu dostaje liste par ent,mat (skonczonych) *)
-let rec make_kdtree objects axis deep =
+let rec create_ objects axis deep =
     if ((List.length objects) < 4) || deep>5
     then
-        Entlist.make_entlist objects
+        Entlist.create objects
     else
     	let sorted = List.sort
             (fun (_,_,_,(min1,_)) (_,_,_,(min2,_)) -> int_of_float ( ((min1).(axis)) -. (min2.(axis)) ) )
@@ -22,8 +17,8 @@ let rec make_kdtree objects axis deep =
         let rightSide = List.fold_left
             (fun lst e -> let _,_,_,(_,max)=e in if (max.(axis)) > pos then e::lst else lst) [] sorted in
 
-        let leftk = make_kdtree leftSide ((axis+1) mod 3) (deep+1) in
-        let rightk = make_kdtree rightSide ((axis+1) mod 3) (deep+1) in
+        let leftk = create_ leftSide ((axis+1) mod 3) (deep+1) in
+        let rightk = create_ rightSide ((axis+1) mod 3) (deep+1) in
 
         let ray_kdnode r td =
             let (r_orig,r_dir),(r_idir,min,max) = r,td in
@@ -49,6 +44,9 @@ let rec make_kdtree objects axis deep =
         let get_normal _ = vec 0. 0. 0. in
         let get_color _ = vec 0. 0. 0. in
 
-        (ray_kdnode, get_normal, get_color, (min,max))
+        ( (ray_kdnode, get_normal, get_color, (min,max)) : entity_t )
 ;;
+
+let create objects =
+    create_ objects 0 0;;
 

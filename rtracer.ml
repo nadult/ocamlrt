@@ -2,152 +2,29 @@
 
 open Base;;
 open Scene;;
-
-type ray = float array * float array
-					
-let ray_sphere r s_pos s_rad =
-	let r_orig,r_dir = r in
-	
-	let dst = r_orig -| s_pos in
-	let b = dot dst r_dir in
-	let c = (dot dst dst) -. (s_rad*.s_rad) in
-	let d = b *. b -. c in
-	if d > 0. then -. b -. (sqrt d) else infinity
-;;
-
-let ray_plane r p_nrm p_dist =
-	let r_orig,r_dir = r in
-
-	let cosa = dot r_dir p_nrm in
-	if (if cosa < 0. then -.cosa else cosa) < 0.000001 then infinity
-	else (p_dist -. (dot r_orig p_nrm)) /. cosa
-;;
-
 open Printf;;
 
+type ray = float array * float array
 
-let ray_triangle r p1 p2 p3 nrm d =
-	let dist = ray_plane r nrm d in
-	if dist <> infinity then
-		let r_orig,r_dir = r in
-		let hit=r_orig+|(r_dir*|dist) in
-		let side1 = dot (cross (p2-|p1) nrm) (hit-|p1) in
-		let side2 = dot (cross (p3-|p2) nrm) (hit-|p2) in
-		let side3 = dot (cross (p1-|p3) nrm) (hit-|p3) in
-		if side1<0.&&side2<0.&&side3<0. then dist else infinity
-		
-	else infinity
-;;
-
-let ray_ent r e =
-	let out = (
-		match e with
-		Sphere(pos,rad)			 	-> ray_sphere r pos rad
-		| Plane(nrm,dist)		 	-> ray_plane r nrm dist
-		| Triangle(p1,p2,p3,nrm,d)	-> ray_triangle r p1 p2 p3 nrm d
-	) in
-	if out < 0. then infinity else out
-;;
-
-(* zwraca t_collision *)
-type t_collision =	No_collision |
-				 	Collision of float * entity * material;;
-
-let ray_entc r e m =
-    let d=ray_ent r e in
-    if d==infinity then No_collision
-    else Collision(d,e,m)
-;;
-
-let min_col a b =
-    match a with
-    No_collision            -> b
-    | Collision(ap,ae,am)   -> (
-            match b with
-            No_collision            -> a
-            | Collision(bp,be,bm)   ->
-                if ap < bp then Collision(ap,ae,am) else Collision(bp,be,bm)
-    )
-;;
-
-let rec ray_kdtree_ r (r_orig,r_idir) (pos,axis,list) (min,max) =
-    if axis==3 then
-        List.fold_left (fun col (e,m) -> min_col col (ray_entc r e m) ) No_collision list
-    else (
-        let orig,idir = (r_orig.(axis)),(r_idir.(axis)) in
-        let tpos = (pos-.orig)*.idir in
-        let lp, la, ll, rp, ra, rl = ( if idir >= 0.
-            then ( match list with (KDNode(a,b,c),_)::(KDNode(d,e,f),_)::_ -> a,b,c,d,e,f ) 
-            else ( match list with (KDNode(a,b,c),_)::(KDNode(d,e,f),_)::_ -> d,e,f,a,b,c )
-        ) in
-
-        if max<tpos then
-            ray_kdtree_ r (r_orig,r_idir) (lp,la,ll) (min,tpos)
-        else if min>tpos then
-            ray_kdtree_ r (r_orig,r_idir) (rp,ra,rl) (tpos,max)
-        else (
-            let lcol = ray_kdtree_ r (r_orig,r_idir) (lp,la,ll) (min,tpos) in
-            let rcol = ray_kdtree_ r (r_orig,r_idir) (rp,ra,rl) (tpos,max) in
-            min_col lcol rcol
-        )
-    )
-;;
-
-let ray_kdtree r (pos,axis,list) =
-    let r_orig,r_dir = r in let r_idir = [| 1./.(r_dir.(0)); 1./.(r_dir.(1)); 1./.(r_dir.(2)) |] in
-    ray_kdtree_ r (r_orig,r_idir) (pos,axis,list) (0.,10000.)
-;;
-
-(* Zwraca parê odleg³oœæ,obiekt *)
-let rec closest_object r s =
-	match s with
-	(e,m)::t		->
-		let col1 = (
-            match e with
-			KDNode(pos,axis,list)	-> ray_kdtree r (pos,axis,list)
-			| _                     -> ray_entc r e m
-		) in min_col col1 (closest_object r t)
-    | []			->  No_collision
-;;
-
-(* col - pozycja kolizji *)
-let entity_normal ent col =
-	match ent with
-	Plane(nrm,_) 			-> nrm
-	| Triangle(_,_,_,nrm,_)	-> nrm
-	| Sphere(pos,_)			-> unitize (col -| pos)
-;;
-
-(* Wylicza koordynaty tekstury dla danego obiektu *)
-let entity_texcoord ent col uscale vscale =
-	match ent with
-	Plane(nrm,_)			->	((col.(0))*.uscale),(((col.(1))+.(col.(2)))*.vscale)
-	| Triangle(_,_,_,nrm,_)	->	((col.(0))*.uscale),(((col.(1))+.(col.(2)))*.vscale)
-	| Sphere(pos,rad)		-> 	(asin ((((col.(0)-.pos.(0))+.(col.(2)-.pos.(2))))/.(rad*.2.)))*.uscale*.2.,
-								(asin (( col.(1)-.pos.(1))/.rad) *. vscale)
-;;
-
-(* oblicza ostateczn¹ normaln¹ bior¹c pod uwagê mapê normalnych *)
-let compute_normal ent nrm_tex col_pos =
-	let base_nrm = entity_normal ent col_pos in
-	match nrm_tex with
-	Empty_texture				-> base_nrm
-	| Standard_texture(tex,u,v) ->
-		let tex_val = (Texture.sample tex (entity_texcoord ent col_pos u v)) in
-		let tex_nrm = (tex_val *| 2.) -| (vec 1. 1. 1.) in
-		let tg1 = vec (-.(base_nrm.(1))) (base_nrm.(0)) (base_nrm.(2)) in let tg2=cross base_nrm tg1 in
-		transform tex_nrm (transpose (vec tg1 tg2 base_nrm))
-;;
-
-(* oblicza wartoœæ tekstury danego obiektu w danym punkcie dla danej tekstury *)
-let compute_texture ent color_tex col_pos =
-	match color_tex with
-	Empty_texture				-> vec 1. 1. 1.
-	| Standard_texture(tex,u,v)	-> Texture.sample tex (entity_texcoord ent col_pos u v)
-;;
 
 let rec ray_trace r ents lights max_refl =
 	let r_orig,r_dir = r in
+    let r_idir = vec (1.0/.(r_dir.(0))) (1.0/.(r_dir.(1))) (1.0/.(r_dir.(2))) in
+
+    let (ray_ents,_,_,_) = ents in
+
+    match ray_ents r (r_idir,0.,10000.) with
+    No_collision                        -> vec 0. 0. 0.
+    | Collision(dist,Entityref(ent))    -> (
+        let (_,get_nrm,get_color,_) = ent in
+        let col_pos = r_orig +| (r_dir *| dist) in
+        get_color col_pos
+    )
+    | Collision(dist,Entityref_this)    -> (
+        vec 1.0 0.0 0.0
+    )
+
+    (*
 
 	match closest_object r ents with
 	No_collision				-> vec 0. 0. 0.
@@ -205,5 +82,7 @@ let rec ray_trace r ents lights max_refl =
 			out *| (1.-.refl_val) +| (reflection*|refl_val)
 		else
 			out
+
+        *)
 ;;
 

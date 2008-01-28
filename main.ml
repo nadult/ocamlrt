@@ -123,11 +123,10 @@ let main (_:unit) =
 	let entities = Scene.load_entities materials in
 	let lights = Scene.load_lights() in
 
-    let sfmat = ( [| 1.;1.;1. |], Scene.Empty_texture, Scene.Empty_texture, 0.) in
-    let sphereflake = Scene.gen_sphereflake [|-3.;0.;35.|] 9. 6 sfmat in
+   (*  let sfmat = ( [| 1.;1.;1. |], Scene.Empty_texture, Scene.Empty_texture, 0.) in
+     let sphereflake = Scene.gen_sphereflake [|-3.;0.;35.|] 9. 6 sfmat in *)
 
-    let in_ents = Scene.optimize_scene sphereflake in
-    gen_tga "output.tga" (resx,resy) in_ents lights max_refl screen_plane_dist;
+    gen_tga "output.tga" (resx,resy) entities lights max_refl screen_plane_dist;
 ;;
 
 main ()

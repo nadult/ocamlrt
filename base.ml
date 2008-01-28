@@ -48,7 +48,7 @@ let reflect r nrm =
 open Scanf;;
 open Printf;;
 	
-(* Parsuje listê obiektów postaci:
+(* Parsuje liste obiektow postaci:
 
 nazwa_typu_listy {\n
 \t	obiekt\n
@@ -71,3 +71,40 @@ let parse_list list_name a func =
 	done;
 	!out
 ;;
+
+(* pozycja; kolor; objêtosc; gêstosc *)
+type light =	float array * float array *
+				float array * int array;;
+
+(* resx; resy; tablica wartosci; nazwa *)
+type texture_t = int * int * (float array array) * string;;
+
+type mat_texture =
+				Standard_texture of texture_t * float * float	|	(* teksturka; skala u; skala v *)
+				Empty_texture;;										(* bez teksturki *)
+
+type material_t = ( (float array) -> (float array) ) *              (* uv -> color *)
+                  ( float array->float array -> (float array) );;  (* uv nrm -> bumped nrm *)
+
+type ray_t = float array * float array;;
+type tracedata_t = float array * float * float;;                (* invdir; mint; maxt *)
+
+type collision_t =  No_collision |                              (* Brak kolizji *)
+                    Collision of float * entityref_t            (* odl. kolizji od ray_orig; odnosnik do collidera *)
+                and
+     entityref_t =  Entityref_this |
+                    Entityref of entity_t
+                and
+     entity_t = ( ray_t->tracedata_t ->collision_t) *           (* ray,trace_data -> collision *)
+                ( (float array) -> (float array) ) *            (* collision pos -> normal *)
+                ( (float array) -> (float array) ) *            (* collision pos -> color *)
+                ( float array * float array );;                 (* bbox min, bbox max *)
+
+
+let extract_entityref (entbase:entity_t) (entref:entityref_t) =
+    match entref with
+    Entityref_this  -> Entityref(entbase)
+    | Entityref(ent)-> Entityref(ent)
+;;
+
+

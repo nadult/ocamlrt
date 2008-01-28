@@ -1,10 +1,9 @@
 open Base;;
-open Scene;;
 
 (* !!Dorobic odblaski
  * Zwraca obiekt typu material_t
  * *)
-let make_material (color:float array) color_tex normal_tex refl =
+let create (color:float array) color_tex normal_tex refl =
 
     let sample_color = (
         match color_tex with
@@ -26,6 +25,10 @@ let make_material (color:float array) color_tex normal_tex refl =
            ( fun _ nrm -> nrm )
     ) in
 
-    ( sample_color, sample_normal )
+    ( ( sample_color, sample_normal ) : material_t )
+;;
+
+let empty =
+    create (vec 1. 1. 1.) Empty_texture Empty_texture 0.
 ;;
 
