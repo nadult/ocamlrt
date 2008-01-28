@@ -29,13 +29,15 @@ type entity =	Sphere of float array * float			(* pozycja; promieñ *)
 type material_t = ( (float array) -> (float array) ) *              (* uv -> color *)
                   ( (float array*float array) -> (float array) );;  (* uv nrm -> bumped nrm *)
 
+type tracedata_t = float array * float * float;;                (* invdir; mint; maxt *)
+
 type collision_t =  No_collision |                              (* Brak kolizji *)
                     Collision of float * entityref_t            (* odl. kolizji od ray_orig; odnosnik do collidera *)
                 and
      entityref_t =  Entityref_this |
                     Entityref of entity_t
                 and
-     entity_t = ( (float array*float array)->collision_t) *     (* ray -> collision *)
+     entity_t = ( (float array*float array*tracedata_t)->collision_t) *     (* ray,trace_data -> collision *)
                 ( (float array) -> (float array) ) *            (* collision pos -> normal *)
                 ( (float array) -> (float array) ) *            (* collision pos -> color *)
                 ( float array * float array );;                 (* bbox min, bbox max *)

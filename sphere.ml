@@ -4,7 +4,7 @@ open Scene;;
 let make_sphere pos rad mat =
     let radp2,irad2,irad = rad *. rad, 0.5 /. rad, 1.0 /. rad in
 
-    let ray_sphere r =
+    let ray_sphere r _ =
 	    let r_orig,r_dir = r in
 	
     	let dst = r_orig -| pos in

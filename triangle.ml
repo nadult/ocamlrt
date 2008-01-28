@@ -11,7 +11,7 @@ let make_triangle p1 p2 p3 mat =
 
     let sample_color,sample_normal = mat in
 
-    let ray_triangle r =
+    let ray_triangle r _ =
         let r_orig,r_dir = r in
         let cosa = dot r_dir nrm in
 

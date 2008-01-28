@@ -3,7 +3,7 @@ open Scene;;
 
 let make_plane nrm dist mat =
 
-    let ray_plane r =
+    let ray_plane r _ =
         let r_orig,r_dir = r in
         let cosa = dot r_dir nrm in
         if (if cosa < 0. then -.cosa else cosa) < 0.000001
