@@ -107,4 +107,9 @@ let extract_entityref (entbase:entity_t) (entref:entityref_t) =
     | Entityref(ent)-> Entityref(ent)
 ;;
 
+let create_collision dist =
+    if dist < 0.
+    then No_collision
+    else Collision ( dist, Entityref_this )
+;;
 

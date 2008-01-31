@@ -11,7 +11,7 @@ let create pos rad mat =
 	    let c = (dot dst dst) -. radp2 in
     	let d = b *. b -. c in
 	    if d > 0.
-        then Collision( -. b -. (sqrt d), Entityref_this )
+        then create_collision (-. b -. (sqrt d))
         else No_collision
     in
 

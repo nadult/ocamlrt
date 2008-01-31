@@ -4,9 +4,6 @@ open Base;;
 open Scene;;
 open Printf;;
 
-type ray = float array * float array
-
-
 let rec ray_trace r ents lights max_refl =
 	let r_orig,r_dir = r in
     let r_idir = vec (1.0/.(r_dir.(0))) (1.0/.(r_dir.(1))) (1.0/.(r_dir.(2))) in
@@ -18,11 +15,31 @@ let rec ray_trace r ents lights max_refl =
     | Collision(dist,Entityref(ent))    -> (
         let (_,get_nrm,get_color,_) = ent in
         let col_pos = r_orig +| (r_dir *| dist) in
-        get_color col_pos
+        let color,normal = get_color col_pos,get_nrm col_pos in
+
+        let add_light last_color (lpos,lcol,lvol,ldens) =
+            let lightDist = length ( lpos -| col_pos ) in
+            let to_light = unitize (lpos -| col_pos ) in
+
+            let new_ray = (col_pos+|(to_light*|0.00001),to_light) in
+            let new_rayidir = vec (1.0/.(to_light.(0))) (1.0/.(to_light.(1))) (1.0/.(to_light.(2))) in
+            let shadowed = (
+                match ray_ents new_ray (new_rayidir,0.,10000.) with
+                No_collision                        -> false
+                | Collision(dist,Entityref(ent2))   -> (dist < lightDist) ) in
+
+            if shadowed
+            then last_color
+            else (
+                let light_value = lcol *| ( (dot to_light normal) /. (lightDist*.lightDist) ) in
+                last_color +| light_value
+            )
+        in
+        let light_val = List.fold_left add_light (vec 0. 0. 0.) lights in
+
+        mulv color light_val
     )
-    | Collision(dist,Entityref_this)    -> (
-        vec 1.0 0.0 0.0
-    )
+
 
     (*
 

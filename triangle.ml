@@ -24,7 +24,7 @@ let create p1 p2 p3 (mat:material_t) =
             let side2 = dot (cross (p3-|p2) nrm) (hit-|p2) in
             let side3 = dot (cross (p1-|p3) nrm) (hit-|p3) in
     		if side1<0.&&side2<0.&&side3<0.
-                then Collision(dist,Entityref_this)
+                then create_collision dist
                 else No_collision
     in
 

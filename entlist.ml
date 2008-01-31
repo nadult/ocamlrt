@@ -1,6 +1,8 @@
 open Base;;
 
 let entities_bbox entities =
+    if List.length entities < 1 then (vec 0. 0. 0.),(vec 0. 0. 0.) else
+
     let update_bbox (bmin1,bmax1) (_,_,_,(bmin2,bmax2)) =
         (minv bmin1 bmin2),(maxv bmax1 bmax2)
     in
@@ -16,11 +18,14 @@ let create entities =
             let (f,_,_,_) = e in
             let c2 = f r td in
             match c1 with
-            No_collision        -> c2
-            | Collision(d1,e1)  ->
-                ( match c2 with
+            No_collision        -> (
+                match c2 with
+                No_collision        -> No_collision
+                | Collision(d2,e2)  -> Collision(d2,extract_entityref e e2)  )
+            | Collision(d1,e1)  -> (
+                match c2 with
                 No_collision        -> c1
-                | Collision(d2,e2)  -> if d1<d2 then c1 else Collision(d2,extract_entityref e e2) )
+                | Collision(d2,e2)  -> if d1<d2 then c1 else Collision(d2,extract_entityref e e2)  )
         in
         List.fold_left ray_ent No_collision entities
     ) in
