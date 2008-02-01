@@ -19,9 +19,9 @@ let load_entities materials =
 						let x,y,z,r = scanf "\t(%f,%f,%f) %f\t\t\t" (fun a b c d-> a,b,c,d) in
                         ( fun mat -> (Sphere.create (vec x y z) r mat)::[] )
 
-		(*			| "box"		->
-						let x,y,z,sx,sy,sz = scanf "\t(%f,%f,%f) (%f,%f,%f)\t\t\t" (fun a b c d e f-> a,b,c,d,e,f) in
-						Box ( [| x; y; z |], [| sx; sy; sz |] )  *)
+					| "box"		->
+						let p1,p2 = scanf "\t(%f,%f,%f) (%f,%f,%f)\t\t\t" (fun a b c d e f-> (vec a b c),(vec d e f)) in
+                        ( fun mat -> Generators.create_box p1 p2 mat )
 
 					| "plane"	->
 						let nx,ny,nz,d = scanf "\t(%f,%f,%f) %f\t\t\t" (fun a b c d-> a,b,c,d) in
@@ -34,7 +34,7 @@ let load_entities materials =
 
                     | "sphereflake"     ->
                             let pos,radius,depth = scanf "\t(%f,%f,%f) %f %d\t\t\t" (fun a b c d e-> (vec a b c),d,e ) in
-                            ( fun mat -> Fractals.create_sphereflake pos radius depth mat )
+                            ( fun mat -> Generators.create_sphereflake pos radius depth mat )
 
 					| _		-> failwith "Unknown object type"
                 ) in

@@ -20,3 +20,23 @@ let create_sphereflake start_pos start_size start_level material =
     inner [] start_level start_pos start_size
 ;;
 
+let create_box min max material =
+    let p0 = min in
+    let p1 = vec (max.(0)) (min.(1)) (min.(2)) in
+    let p2 = vec (min.(0)) (min.(1)) (max.(2)) in
+    let p3 = vec (max.(0)) (min.(1)) (max.(2)) in
+    let p4 = vec (min.(0)) (max.(1)) (min.(2)) in
+    let p5 = vec (max.(0)) (max.(1)) (min.(2)) in
+    let p6 = vec (min.(0)) (max.(1)) (max.(2)) in
+    let p7 = max in
+
+    let make_quad a b c d = [Triangle.create a d c material; Triangle.create c b a material] in
+
+    (make_quad p0 p1 p5 p4) @
+    (make_quad p3 p2 p6 p7) @
+    (make_quad p3 p1 p5 p7) @
+    (make_quad p2 p0 p4 p6) @
+    (make_quad p4 p5 p7 p6) @
+    (make_quad p2 p3 p1 p0) @
+    []
+;;
