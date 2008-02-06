@@ -21,7 +21,7 @@ let rec create_ objects deep bmin bmax=
             let ns,pos_in_node = bmax-|bmin,(pos-.bmin.(axis))/.(bmax.(axis)-.bmin.(axis)) in
 
             (* Wylicza powierzchnie pudelka o danych wymiarach *)
-            let eval_surf s = s.(0)*.s.(1)+.s.(0)*.s.(2)+.s.(1)*.s.(2) in
+            let eval_surf s = (vx s)*.(vy s)+.(vx s)*.(vz s)+.(vy s)*.(vz s) in
 
 
             let left_cost  = eval_surf (setvn ns axis (ns.(axis)*.pos_in_node)       ) in
@@ -99,7 +99,7 @@ let rec create_ objects deep bmin bmax=
             in
 
             let get_normal _ = vec 0. 0. 0. in
-            let get_color _ = vec 0. 0. 0. in
+            let get_color _ = vec 0. 0. 0., 0. in
    
             ( (ray_kdnode, get_normal, get_color, (bmin,bmax)) : entity_t )
         )

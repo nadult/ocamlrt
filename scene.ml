@@ -17,20 +17,20 @@ let load_entities materials =
                 let func = ( match etype with
 					"sphere"	->
 						let x,y,z,r = scanf "\t(%f,%f,%f) %f\t\t\t" (fun a b c d-> a,b,c,d) in
-                        ( fun mat -> (Sphere.create (vec x y z) r mat)::[] )
+                        ( fun mat -> [ Sphere.create (vec x y z) r mat ] )
 
 					| "box"		->
 						let p1,p2 = scanf "\t(%f,%f,%f) (%f,%f,%f)\t\t\t" (fun a b c d e f-> (vec a b c),(vec d e f)) in
-                        ( fun mat -> Generators.create_box p1 p2 mat )
+                        ( fun mat -> [ Box.create p1 p2 mat ] )
 
 					| "plane"	->
 						let nx,ny,nz,d = scanf "\t(%f,%f,%f) %f\t\t\t" (fun a b c d-> a,b,c,d) in
-                        ( fun mat -> (Plane.create (unitize (vec nx ny nz)) d mat)::[] )
+                        ( fun mat -> [ Plane.create (vunit (vec nx ny nz)) d mat ] )
 
 					| "tri"		->
 						let p1,p2,p3 = scanf "\t(%f,%f,%f) (%f,%f,%f) (%f,%f,%f)\t\t\t"
                             (fun a b c d e f g h i-> (vec a b c), (vec d e f), (vec g h i)) in
-                            ( fun mat -> (Triangle.create p1 p2 p3 mat)::[] )
+                            ( fun mat -> [ Triangle.create p1 p2 p3 mat ] )
 
                     | "sphereflake"     ->
                             let pos,radius,depth = scanf "\t(%f,%f,%f) %f %d\t\t\t" (fun a b c d e-> (vec a b c),d,e ) in
@@ -87,10 +87,10 @@ let load_lights (_:unit) =
 	parse_list "lights" ([]: light list)
 		(fun lst ->
 			let volume,density = ( match scanf "%s" id with
-				"point" ->	[|0.;0.;0.|],[|1;1;1|]
-				| "box" -> scanf " {(%f,%f,%f),(%d,%d,%d)}" (fun a b c d e f->[|a;b;c|],[|d;e;f|])
+				"point" ->	(vec 0. 0. 0. ),( 1,1,1 )
+				| "box" -> scanf " {(%f,%f,%f),(%d,%d,%d)}" (fun a b c d e f->(vec a b c),(d,e,f))
 				| _		-> failwith "Unknown light type" ) in
-			let px,py,pz,r,g,b = scanf " (%f,%f,%f) (%f,%f,%f)" (fun a b c d e f->a,b,c,d,e,f) in
-			( [| px; py; pz |],[| r; g; b |],volume,density ) :: lst
+			let pos,col = scanf " (%f,%f,%f) (%f,%f,%f)" (fun a b c d e f->(vec a b c),(vec d e f)) in
+			List.append ( Generators.create_boxlight pos volume density col) lst
 		)
 ;;

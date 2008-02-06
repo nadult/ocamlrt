@@ -4,7 +4,7 @@ let entities_bbox entities =
     if List.length entities < 1 then (vec 0. 0. 0.),(vec 0. 0. 0.) else
 
     let update_bbox (bmin1,bmax1) (_,_,_,(bmin2,bmax2)) =
-        (minv bmin1 bmin2),(maxv bmax1 bmax2)
+        (vmin bmin1 bmin2),(vmax bmax1 bmax2)
     in
     let (_,_,_,(tmin,tmax)) = List.hd entities in
 
@@ -31,7 +31,7 @@ let create entities =
     ) in
 
     let get_normal _ = vec 0. 0. 0. in
-    let get_color _ = vec 0. 0. 0. in
+    let get_color _ = vec 0. 0. 0., 0. in
     let bmin,bmax = entities_bbox entities in
 
     ( (ray_list, get_normal, get_color, (bmin,bmax)) : entity_t )

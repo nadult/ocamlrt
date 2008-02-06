@@ -7,8 +7,8 @@ let create pos rad mat =
 	    let r_orig,r_dir = r in
 	
     	let dst = r_orig -| pos in
-    	let b = dot dst r_dir in
-	    let c = (dot dst dst) -. radp2 in
+    	let b = vdot dst r_dir in
+	    let c = (vdot dst dst) -. radp2 in
     	let d = b *. b -. c in
 	    if d > 0.
         then create_collision (-. b -. (sqrt d))
@@ -18,12 +18,12 @@ let create pos rad mat =
     let sample_color, sample_normal = mat in
 
     let compute_uv col =
-        [| asin((((col.(0)-.pos.(0))+.(col.(2)-.pos.(2))))*.irad2)*.2. ;
-        asin( (col.(1)-.pos.(1))*.irad ) |]
+        let diff = pos -| col in
+        vec (asin(((vx diff)+.(vz diff))*.irad2)*.2.) (asin((vy diff)*.irad)) 0.
     in
 
     let get_normal col =
-        sample_normal (compute_uv col) (unitize (col -| pos))
+        sample_normal (compute_uv col) (vunit (col -| pos))
     in
 
     let get_color col =

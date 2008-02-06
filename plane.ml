@@ -4,16 +4,16 @@ let create nrm dist mat =
 
     let ray_plane r _ =
         let r_orig,r_dir = r in
-        let cosa = dot r_dir nrm in
+        let cosa = vdot r_dir nrm in
         if (if cosa < 0. then -.cosa else cosa) < 0.000001
         then No_collision
-        else create_collision ((dist -. (dot r_orig nrm)) /. cosa)
+        else create_collision ((dist -. (vdot r_orig nrm)) /. cosa)
     in
 
     let sample_color, sample_normal = mat in
 
     let compute_uv col =
-        [| (col.(0)) ; ((col.(1))+.(col.(2))) |]
+        [| vx col; (vy col)+.(vz col) |]
     in
 
     let get_normal col =

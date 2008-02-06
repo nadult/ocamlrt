@@ -20,23 +20,25 @@ let create_sphereflake start_pos start_size start_level material =
     inner [] start_level start_pos start_size
 ;;
 
-let create_box min max material =
-    let p0 = min in
-    let p1 = vec (max.(0)) (min.(1)) (min.(2)) in
-    let p2 = vec (min.(0)) (min.(1)) (max.(2)) in
-    let p3 = vec (max.(0)) (min.(1)) (max.(2)) in
-    let p4 = vec (min.(0)) (max.(1)) (min.(2)) in
-    let p5 = vec (max.(0)) (max.(1)) (min.(2)) in
-    let p6 = vec (min.(0)) (max.(1)) (max.(2)) in
-    let p7 = max in
+let create_boxlight pos size density color =
+    let dx,dy,dz = density in
+    let mul = vmul ( size*|0.5 ) (vinv (vec (float_of_int dx) (float_of_int dy) (float_of_int dz))) in
+    let start_pos = pos-|(size*|0.5) in
+    let tcolor = color *| (1.0 /. (float_of_int (dx*dy*dz))) in
 
-    let make_quad a b c d = [Triangle.create a d c material; Triangle.create c b a material] in
+    let rec gen_lights x y z =
 
-    (make_quad p0 p1 p5 p4) @
-    (make_quad p3 p2 p6 p7) @
-    (make_quad p3 p1 p5 p7) @
-    (make_quad p2 p0 p4 p6) @
-    (make_quad p4 p5 p7 p6) @
-    (make_quad p2 p3 p1 p0) @
-    []
+        let light = (
+            let tpos = vec (float_of_int x) (float_of_int y) (float_of_int z) in
+            let pos = start_pos+| (vmul tpos mul) in
+            ( pos, color )
+        ) in
+
+             if x<dx then light :: (gen_lights (x+1) y z)
+        else if y<dy then light :: (gen_lights 1 (y+1) z)
+        else if z<dz then light :: (gen_lights 1 1 (z+1))
+        else [ light ]
+    in
+
+    gen_lights 1 1 1
 ;;

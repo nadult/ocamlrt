@@ -11,7 +11,7 @@ let create (_:unit) =
     in
 
     let get_color (_:float array) =
-        vec 0. 0. 0.
+        vec 0. 0. 0., 0.
     in
 
    (  ( ray_dummy, get_nrm, get_color, ((vec 0. 0. 0.),(vec 0. 0. 0.)) ) : entity_t )

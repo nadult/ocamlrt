@@ -15,7 +15,7 @@ let gen_picture (resx,resy) entities lights max_refl screen_plane_dist (sy,ny) =
 
 	for y = sy to sy+ny-1 do
 		for x = 0 to resx-1 do
-			let r = ( vec 0. 0. 0.,unitize (vec 
+			let r = ( vec 0. 0. 0.,vunit (vec 
 				(((float_of_int x) /. (float_of_int resx) -. 0.5) *. ((float_of_int resx) /. (float_of_int resy)))
 				((float_of_int y) /. (float_of_int resy) -. 0.5)
 				screen_plane_dist) ) in
@@ -76,9 +76,9 @@ let gen_tga file_name (resx,resy) entities lights max_refl screen_plane_dist =
         let _,_,arr = gen_picture (resx,resy) entities lights max_refl screen_plane_dist (y,1) in
         for x=0 to resx-1 do
 			let rgb = arr.(x) in
-			output_byte out (rgb /(256*256));
-			output_byte out ((rgb /256)mod 256);
 			output_byte out (rgb mod 256);
+			output_byte out ((rgb /256)mod 256);
+			output_byte out (rgb /(256*256));
         done;
     done;
 			
@@ -107,9 +107,9 @@ let print_tga pic file_name =
 	
 	iterate_pixels (resx,resy) (fun x y->
 			let rgb = arr.(x+(resy-y-1)*resx) in
-			output_byte out (rgb /(256*256));
+			output_byte out (rgb mod 256);
 			output_byte out ((rgb /256)mod 256);
-			output_byte out (rgb mod 256) );
+            output_byte out (rgb /(256*256)); );
 			
 	printf "...done\n";
 ;;
@@ -118,13 +118,14 @@ let main (_:unit) =
 	let resx,resy,max_refl,screen_plane_dist = scanf "(%d,%d) %d %f\n" (fun a b c d -> (a,b,c,d)) in
 	(*  *)
 	
+    printf "Loadin textures...";
 	let textures = Texture.load_all() in
     let materials = Scene.load_materials textures in
+    printf "...done. %d textures loaded.\nLoading scene (creating kdtree)..." (List.length textures);
 	let entities = Scene.load_entities materials in
+    printf "...done.\n";
 	let lights = Scene.load_lights() in
-
-   (*  let sfmat = ( [| 1.;1.;1. |], Scene.Empty_texture, Scene.Empty_texture, 0.) in
-     let sphereflake = Scene.gen_sphereflake [|-3.;0.;35.|] 9. 6 sfmat in *)
+    printf "Lights: %d.\n" (List.length lights);
 
     gen_tga "output.tga" (resx,resy) entities lights max_refl screen_plane_dist;
 ;;
