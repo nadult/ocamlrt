@@ -118,12 +118,9 @@ let main (_:unit) =
 	let resx,resy,max_refl,screen_plane_dist = scanf "(%d,%d) %d %f\n" (fun a b c d -> (a,b,c,d)) in
 	(*  *)
 	
-    printf "Loadin textures...";
 	let textures = Texture.load_all() in
     let materials = Scene.load_materials textures in
-    printf "...done. %d textures loaded.\nLoading scene (creating kdtree)..." (List.length textures);
 	let entities = Scene.load_entities materials in
-    printf "...done.\n";
 	let lights = Scene.load_lights() in
     printf "Lights: %d.\n" (List.length lights);
 

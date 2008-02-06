@@ -31,7 +31,7 @@ let create_boxlight pos size density color =
         let light = (
             let tpos = vec (float_of_int x) (float_of_int y) (float_of_int z) in
             let pos = start_pos+| (vmul tpos mul) in
-            ( pos, color )
+            ( pos, tcolor )
         ) in
 
              if x<dx then light :: (gen_lights (x+1) y z)
